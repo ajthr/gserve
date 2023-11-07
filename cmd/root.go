@@ -13,9 +13,10 @@ import (
 )
 
 var rootCmd = &cobra.Command{
-	Use:   "gserve",
-	Short: "CLI tool to create a simple, zero-configuration HTTP file server.",
-	Run: server.Init,
+	Use:   		"gserve",
+	Version:	"0.1",
+	Short: 		"CLI tool to create a simple, zero-configuration HTTP file server.",
+	Run: 		server.Init,
 }
 
 func Execute() {
