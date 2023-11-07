@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.Path}}</title>
+    <link rel="icon" href="data:,">
+    <script src="https://kit.fontawesome.com/6ab289027b.js" crossorigin="anonymous"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600&display=swap');
+
+        body {
+            font-family: 'Source Code Pro', monospace;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+
+        .container {
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .title {
+            padding-bottom: 10px;
+            border-bottom: 2px solid #ccc;
+            color: #333333;
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .file-item,
+        .folder-item {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid #ccc;
+            margin: 5px 0;
+            padding: 10px 0;
+        }
+
+        .file-item-text,
+        .folder-item-text {
+            display: flex;
+            flex-direction: row;
+            white-space: nowrap;
+        }
+
+        .file-item-text::before,
+        .folder-item-text::before {
+            display: block;
+            font-family: 'FontAwesome';
+            color: #333333;
+            font-size: 1.1em;
+            margin: 0px 7px;
+        }
+
+        .folder-item-text::before {
+            content: '\f07b';
+        }
+
+        .file-item-text::before {
+            content: '\f15c';
+        }
+
+        .folder-item-text {
+            cursor: pointer;
+        }
+
+        .link {
+            text-decoration: none;
+            color: #1a1a1a;
+            width: 100%;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .date-modified {
+            width: 50%;
+            text-align: right;
+        }
+
+        @media screen and (max-width: 480px) {
+            .file-item-text,
+            .folder-item-text {
+                width: 50%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="title">{{.Path}}</h1>
+        <ul class="file-list">
+
+            {{range .Directories}}
+            <li class="folder-item">
+                <span class="folder-item-text">
+                    <a href="{{.Path}}" class="link">
+                        {{.Name}}
+                    </a>
+                </span>
+                <span class="date-modified">
+                    {{.Size}}
+                </span>
+            </li>
+            {{end}}
+            {{range .Files}}
+            <li class="file-item">
+                <span class="file-item-text">
+                    <a href="{{.Path}}" class="link">
+                        {{.Name}}
+                    </a>
+                </span>
+                <span class="date-modified">
+                    {{.Size}}
+                </span>
+            </li>
+            {{end}}
+
+        </ul>
+    </div>
+</body>
+
+</html>
