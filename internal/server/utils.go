@@ -49,8 +49,8 @@ func formatBytes(bytes int64) string {
 
 func getContentProperty(entry fs.DirEntry, relativePath string) *Property {
 	property := NewProperty()
-	property.SetName(entry.Name())
-	property.SetPath(filepath.Join(relativePath, entry.Name()))
+	property.Name = entry.Name()
+	property.Path = filepath.Join(relativePath, entry.Name())
 	
 	localFileInfo, err := entry.Info()
 	if err != nil {
@@ -62,7 +62,7 @@ func getContentProperty(entry fs.DirEntry, relativePath string) *Property {
 		} else {
 			size = formatBytes(localFileInfo.Size())
 		}
-		property.SetSize(size)
+		property.Size = size
 	}
 
 	return property
@@ -75,13 +75,13 @@ func GetDirectoryContents(path string, relativePath string) *Content {
 	}
 	
 	content := NewContent()
-	content.SetPath(filepath.Base(path))
+	content.Path = filepath.Base(path)
 	for _, entry := range entries {
 		fileInfo, _ := os.Stat(filepath.Join(path, entry.Name()))
 		if fileInfo.IsDir() {
-			content.addDirectory(getContentProperty(entry, relativePath))
+			content.Directories = append(content.Directories, *getContentProperty(entry, relativePath))
 		} else {
-			content.addFile(getContentProperty(entry, relativePath))
+			content.Files = append(content.Files, *getContentProperty(entry, relativePath))
 		}
 	}
 	return content
