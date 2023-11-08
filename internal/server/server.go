@@ -28,6 +28,7 @@ func indexHTMLTemplateHandler(response http.ResponseWriter, request *http.Reques
 	path := filepath.Join(rootDir, relativePath)
 	
 	if !Exists(path) {
+		response.WriteHeader(http.StatusNotFound)
 		tmpl := template.Must(template.ParseFiles("templates/notFound.html"))
 		tmpl.Execute(response, nil)
 	} else {
@@ -51,6 +52,7 @@ func indexHTMLTemplateHandler(response http.ResponseWriter, request *http.Reques
 			}
 			response.Header().Set("Content-Disposition", "attachment; filename=" + fileInfo.Name())
 			response.Header().Set("Content-Type", mtype.String())
+			response.WriteHeader(http.StatusOK)
 			http.ServeContent(response, request, path, time.Now(), bytes.NewReader(data))
 		}
 	}
