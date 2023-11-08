@@ -27,34 +27,48 @@ func indexHTMLTemplateHandler(response http.ResponseWriter, request *http.Reques
 
 	path := filepath.Join(rootDir, relativePath)
 	
-	if !Exists(path) {
+	fileInfo, err := os.Stat(path)
+	if err != nil {
 		response.WriteHeader(http.StatusNotFound)
-		tmpl := template.Must(template.ParseFiles("templates/notFound.html"))
+		tmpl := template.Must(template.ParseFiles("templates/404.html"))
 		tmpl.Execute(response, nil)
-	} else {
-		fileInfo, err := os.Stat(path)
+	}
+
+	if fileInfo.IsDir() {
+		content, err := GetContents(path, relativePath)
 		if err != nil {
-			log.Panic(err)
+			log.Println(err)
+			response.WriteHeader(http.StatusInternalServerError)
+			tmpl := template.Must(template.ParseFiles("templates/500.html"))
+			tmpl.Execute(response, nil)
+		}
+		
+		tmpl := template.Must(template.ParseFiles("templates/index.html"))
+		tmpl.Execute(response, content)
+	
+	} else {
+	
+		data, err := ioutil.ReadFile(path)
+		if(err != nil){
+			log.Println(err)
+			response.WriteHeader(http.StatusInternalServerError)
+			tmpl := template.Must(template.ParseFiles("templates/500.html"))
+			tmpl.Execute(response, nil)
 		}
 
-		if fileInfo.IsDir() {
-			content := GetDirectoryContents(path, relativePath)
-			tmpl := template.Must(template.ParseFiles("templates/index.html"))
-			tmpl.Execute(response, content)
-		} else {
-			data, err := ioutil.ReadFile(path)
-			if(err != nil){
-				log.Fatal(err)
-			}
-			mtype, err := mimetype.DetectFile(path)
-			if err != nil {
-				log.Panic(err)
-			}
-			response.Header().Set("Content-Disposition", "attachment; filename=" + fileInfo.Name())
-			response.Header().Set("Content-Type", mtype.String())
-			response.WriteHeader(http.StatusOK)
-			http.ServeContent(response, request, path, time.Now(), bytes.NewReader(data))
+		mtype, err := mimetype.DetectFile(path)
+		if err != nil {
+
+			response.WriteHeader(http.StatusInternalServerError)
+			tmpl := template.Must(template.ParseFiles("templates/500.html"))
+			tmpl.Execute(response, nil)
+
 		}
+
+		response.Header().Set("Content-Disposition", "attachment; filename=" + fileInfo.Name())
+		response.Header().Set("Content-Type", mtype.String())
+		response.WriteHeader(http.StatusOK)
+		http.ServeContent(response, request, path, time.Now(), bytes.NewReader(data))
 	}
 }
 

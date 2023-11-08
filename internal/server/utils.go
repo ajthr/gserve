@@ -25,11 +25,6 @@ func GetOutboundIP() net.IP {
     return localAddr.IP
 }
 
-func Exists(path string) bool {
-    _, err := os.Stat(path)
-    return err == nil
-}
-
 func formatBytes(bytes int64) string {
 	const unit = 1024
 	
@@ -47,14 +42,14 @@ func formatBytes(bytes int64) string {
 	return strconv.FormatFloat(val, 'f', 2, 64) + units[div]
 }
 
-func getContentProperty(entry fs.DirEntry, relativePath string) *Property {
+func getContentProperty(entry fs.DirEntry, relativePath string) (*Property, error) {
 	property := NewProperty()
 	property.Name = entry.Name()
 	property.Path = filepath.Join(relativePath, entry.Name())
 	
 	localFileInfo, err := entry.Info()
 	if err != nil {
-		log.Panic(err)
+		return &Property{}, err
 	} else {
 		var size string
 		if (localFileInfo.Size() == 0) {
@@ -65,24 +60,43 @@ func getContentProperty(entry fs.DirEntry, relativePath string) *Property {
 		property.Size = size
 	}
 
-	return property
+	return property, nil
 }
 
-func GetDirectoryContents(path string, relativePath string) *Content {
-	entries, err := os.ReadDir(path)
-	if err != nil {
-		log.Panic(err)
-	}
-	
+func getDirectoryContents(path string, relativePath string, entries []fs.DirEntry) (*Content, error) {
 	content := NewContent()
 	content.Path = filepath.Base(path)
 	for _, entry := range entries {
-		fileInfo, _ := os.Stat(filepath.Join(path, entry.Name()))
+		fileInfo, err := entry.Info()
+		if err != nil {
+			return &Content{}, err
+		}
 		if fileInfo.IsDir() {
-			content.Directories = append(content.Directories, *getContentProperty(entry, relativePath))
+			property, err := getContentProperty(entry, relativePath)
+			if err != nil {
+				return &Content{}, err
+			}
+			content.Directories = append(content.Directories, *property)
 		} else {
-			content.Files = append(content.Files, *getContentProperty(entry, relativePath))
+			property, err := getContentProperty(entry, relativePath)
+			if err != nil {
+				return &Content{}, err
+			}
+			content.Files = append(content.Files, *property)
 		}
 	}
-	return content
+	return content, nil
+}
+
+func GetContents(path string, relativePath string) (*Content, error) {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return &Content{}, err
+	}
+
+	contents, err := getDirectoryContents(path, relativePath, entries)
+	if err != nil {
+		return &Content{}, err
+	}
+	return contents, nil
 }
