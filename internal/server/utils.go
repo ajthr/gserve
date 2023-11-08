@@ -71,6 +71,7 @@ func getDirectoryContents(path string, relativePath string, searchTerm string, e
 
 	content := NewContent()
 	content.Path = filepath.Base(path)
+	content.PreviousPath = filepath.Clean(filepath.Join(relativePath, ".."))
 	
 	for _, entry := range entries {
 		fileInfo, err := entry.Info()

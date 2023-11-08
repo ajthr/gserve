@@ -12,6 +12,7 @@ type Property struct {
 
 type Content struct {
 	Path			string
+	PreviousPath	string
 	Files			[]Property
 	Directories		[]Property
 }
@@ -27,6 +28,7 @@ func NewProperty() *Property {
 func NewContent() *Content {
 	return &Content{
 		Path:			"",
+		PreviousPath:	"",
 		Files:			[]Property{},
 		Directories:	[]Property{},
 	}

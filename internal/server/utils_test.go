@@ -87,6 +87,7 @@ func TestGetDirectoryContents(t *testing.T) {
 
 	expectedContents := &Content{
 		Path: "to",
+		PreviousPath: filepath.Clean("/path"),
 		Files: []Property{
 				Property{
 					Name:	"test_file1.txt",
@@ -132,6 +133,7 @@ func TestGetDirectoryContentsWithSearch(t *testing.T) {
 
 	expectedContents := &Content{
 		Path: "to",
+		PreviousPath: filepath.Clean("/path"),
 		Files: []Property{
 				Property{
 					Name:	"test_file1.txt",
