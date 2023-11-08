@@ -32,43 +32,46 @@ func indexHTMLTemplateHandler(response http.ResponseWriter, request *http.Reques
 		response.WriteHeader(http.StatusNotFound)
 		tmpl := template.Must(template.ParseFiles("templates/404.html"))
 		tmpl.Execute(response, nil)
-	}
-
-	if fileInfo.IsDir() {
-		content, err := GetContents(path, relativePath)
-		if err != nil {
-			log.Println(err)
-			response.WriteHeader(http.StatusInternalServerError)
-			tmpl := template.Must(template.ParseFiles("templates/500.html"))
-			tmpl.Execute(response, nil)
-		}
-		
-		tmpl := template.Must(template.ParseFiles("templates/index.html"))
-		tmpl.Execute(response, content)
-	
 	} else {
-	
-		data, err := ioutil.ReadFile(path)
-		if(err != nil){
-			log.Println(err)
-			response.WriteHeader(http.StatusInternalServerError)
-			tmpl := template.Must(template.ParseFiles("templates/500.html"))
-			tmpl.Execute(response, nil)
+
+		if fileInfo.IsDir() {
+			searchTerm := request.URL.Query().Get("s")
+			content, err := GetContents(path, relativePath, searchTerm)
+
+			if err != nil {
+				log.Println(err)
+				response.WriteHeader(http.StatusInternalServerError)
+				tmpl := template.Must(template.ParseFiles("templates/500.html"))
+				tmpl.Execute(response, nil)
+			}
+			
+			tmpl := template.Must(template.ParseFiles("templates/index.html"))
+			tmpl.Execute(response, content)
+		
+		} else {
+		
+			data, err := ioutil.ReadFile(path)
+			if(err != nil){
+				log.Println(err)
+				response.WriteHeader(http.StatusInternalServerError)
+				tmpl := template.Must(template.ParseFiles("templates/500.html"))
+				tmpl.Execute(response, nil)
+			}
+
+			mtype, err := mimetype.DetectFile(path)
+			if err != nil {
+
+				response.WriteHeader(http.StatusInternalServerError)
+				tmpl := template.Must(template.ParseFiles("templates/500.html"))
+				tmpl.Execute(response, nil)
+
+			}
+
+			response.Header().Set("Content-Disposition", "attachment; filename=" + fileInfo.Name())
+			response.Header().Set("Content-Type", mtype.String())
+			response.WriteHeader(http.StatusOK)
+			http.ServeContent(response, request, path, time.Now(), bytes.NewReader(data))
 		}
-
-		mtype, err := mimetype.DetectFile(path)
-		if err != nil {
-
-			response.WriteHeader(http.StatusInternalServerError)
-			tmpl := template.Must(template.ParseFiles("templates/500.html"))
-			tmpl.Execute(response, nil)
-
-		}
-
-		response.Header().Set("Content-Disposition", "attachment; filename=" + fileInfo.Name())
-		response.Header().Set("Content-Type", mtype.String())
-		response.WriteHeader(http.StatusOK)
-		http.ServeContent(response, request, path, time.Now(), bytes.NewReader(data))
 	}
 }
 

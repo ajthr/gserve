@@ -22,9 +22,33 @@
             padding: 20px;
         }
 
-        .title {
-            padding-bottom: 10px;
+        .header {
+            display: flex;
+            flex-direction: row;
+            align-items: flex-end;
+            justify-content: space-between;
+            padding-bottom: 5px;
             border-bottom: 2px solid #ccc;
+        }
+
+        .title {
+            font-size: 2em;
+            font-weight: bold;
+            color: #333333;
+            padding: 0;
+        }
+
+        input[type=text] {
+            appearance: none;
+            font-family: 'Source Code Pro', monospace;
+            border: none;
+            outline: none;
+            height: 25px;
+            width: 150px;
+            border-bottom: .2em solid #333333;
+            background: rgba(#333333, .2);
+            border-radius: .2em .2em 0 0;
+            padding: .4em;
             color: #333333;
         }
 
@@ -96,7 +120,10 @@
 
 <body>
     <div class="container">
-        <h1 class="title">{{.Path}}</h1>
+        <div class="header">
+            <span class="title">{{.Path}}</span>
+            <input type="text" placeholder="search" id="search-input" />
+        </div>
         <ul class="file-list">
 
             {{range .Directories}}
@@ -126,6 +153,32 @@
 
         </ul>
     </div>
+    <script>
+        const searchInput = document.getElementById('search-input');
+        const urlSearchParams = new URLSearchParams(window.location.search);
+        const searchTerm = urlSearchParams.get('s');
+        searchInput.value = searchTerm;
+        searchInput.focus()
+        
+        window.addEventListener('popstate', () => {
+            location.reload();
+        });
+
+        searchInput.addEventListener('change', (event) => {
+          const searchTerm = event.target.value;
+          const urlSearchParams = new URLSearchParams(window.location.search);
+          
+          if (searchTerm === "") {
+            urlSearchParams.delete('s');
+          } else {
+            urlSearchParams.set('s', searchTerm);
+          }
+
+          const newUrl = `${window.location.pathname}?${urlSearchParams.toString()}`;
+          window.history.pushState(null, '', newUrl);
+          window.location.reload()
+        });
+      </script>
 </body>
 
 </html>

@@ -6,10 +6,13 @@ package server
 
 import (
 	"os"
+	"fmt"
 	"io/fs"
 	"log"
 	"net"
+	"strings"
 	"strconv"
+	"regexp"
 	"path/filepath"
 )
 
@@ -63,38 +66,46 @@ func getContentProperty(entry fs.DirEntry, relativePath string) (*Property, erro
 	return property, nil
 }
 
-func getDirectoryContents(path string, relativePath string, entries []fs.DirEntry) (*Content, error) {
+func getDirectoryContents(path string, relativePath string, searchTerm string, entries []fs.DirEntry) (*Content, error) {
+	regex := fmt.Sprintf("[a-zA-Z]*%s[a-zA-Z]*", strings.ToLower(searchTerm))
+
 	content := NewContent()
 	content.Path = filepath.Base(path)
+	
 	for _, entry := range entries {
 		fileInfo, err := entry.Info()
 		if err != nil {
 			return &Content{}, err
 		}
-		if fileInfo.IsDir() {
-			property, err := getContentProperty(entry, relativePath)
-			if err != nil {
-				return &Content{}, err
+
+		match, _ := regexp.MatchString(regex, strings.ToLower(fileInfo.Name()))
+		if match {
+			if fileInfo.IsDir() {
+				property, err := getContentProperty(entry, relativePath)
+				if err != nil {
+					return &Content{}, err
+				}
+				content.Directories = append(content.Directories, *property)
+			} else {
+				property, err := getContentProperty(entry, relativePath)
+				if err != nil {
+					return &Content{}, err
+				}
+				content.Files = append(content.Files, *property)
 			}
-			content.Directories = append(content.Directories, *property)
-		} else {
-			property, err := getContentProperty(entry, relativePath)
-			if err != nil {
-				return &Content{}, err
-			}
-			content.Files = append(content.Files, *property)
 		}
 	}
 	return content, nil
 }
 
-func GetContents(path string, relativePath string) (*Content, error) {
+func GetContents(path string, relativePath string, searchTerm string) (*Content, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
 		return &Content{}, err
 	}
 
-	contents, err := getDirectoryContents(path, relativePath, entries)
+	contents, err := getDirectoryContents(path, relativePath, searchTerm, entries)
+	
 	if err != nil {
 		return &Content{}, err
 	}

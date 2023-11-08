@@ -81,7 +81,52 @@ func TestGetDirectoryContents(t *testing.T) {
 	path := "/home/test_user/path/to"
 	relativePath := "/path/to"
 
-	contents, err := getDirectoryContents(path, relativePath, mockEntries)
+	contents, err := getDirectoryContents(path, relativePath, "", mockEntries)
+
+	assert.Equal(t, err, nil)
+
+	expectedContents := &Content{
+		Path: "to",
+		Files: []Property{
+				Property{
+					Name:	"test_file1.txt",
+					Path:	filepath.Clean("/path/to/test_file1.txt"),
+					Size:	"512B",
+				},
+				Property{
+					Name:	"test_file2.txt",
+					Path:	filepath.Clean("/path/to/test_file2.txt"),
+					Size:	"256B",
+				},
+			},
+		Directories: []Property{
+			Property{
+				Name:	"test_folder",
+				Path:	filepath.Clean("/path/to/test_folder"),
+				Size:	"",
+			},
+		},
+	}
+
+	assert.Equal(t, expectedContents, contents)
+
+}
+
+func TestGetDirectoryContentsWithSearch(t *testing.T) {
+
+	mockEntries := []fs.DirEntry{
+		fs.FileInfoToDirEntry(MockFileInfo{"test_file1.txt", 512, fs.FileMode(0644), time.Now(), false}),
+		fs.FileInfoToDirEntry(MockFileInfo{"test_file2.txt", 256, fs.FileMode(0644), time.Now(), false}),
+		fs.FileInfoToDirEntry(MockFileInfo{"test_folder", 0, fs.FileMode(0644), time.Now(), true}),
+		fs.FileInfoToDirEntry(MockFileInfo{"new_file1.txt", 512, fs.FileMode(0644), time.Now(), false}),
+		fs.FileInfoToDirEntry(MockFileInfo{"new_file2.txt", 256, fs.FileMode(0644), time.Now(), false}),
+		fs.FileInfoToDirEntry(MockFileInfo{"new_folder", 0, fs.FileMode(0644), time.Now(), true}),
+	}
+
+	path := "/home/test_user/path/to"
+	relativePath := "/path/to"
+
+	contents, err := getDirectoryContents(path, relativePath, "test", mockEntries)
 
 	assert.Equal(t, err, nil)
 
