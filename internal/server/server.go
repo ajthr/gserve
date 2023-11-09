@@ -27,7 +27,7 @@ var f embed.FS
 
 func indexHTMLTemplateHandler(response http.ResponseWriter, request *http.Request) {
 	relativePath := strings.TrimPrefix(request.URL.Path, "/")
-	log.Println(filepath.Clean(relativePath + "/"))
+	log.Println("GET " + filepath.Clean(relativePath + "/"))
 
 	path := filepath.Join(rootDir, relativePath)
 	
@@ -101,7 +101,7 @@ func Init(cmd *cobra.Command, args []string) {
 		log.Fatal(err)
 	}
 
-	log.SetPrefix("HLS: ")
+	log.SetPrefix("gserve: ")
 	log.Printf("Serving %s on %s:%s\n", rootDir, GetOutboundIP(), port)
 
 	log.Fatal(http.ListenAndServe(":" + port, nil))
