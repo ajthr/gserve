@@ -1,3 +1,6 @@
+[![Development Completed](https://img.shields.io/badge/Development%20Status-Completed-brightgreen.svg)](https://github.com/ajthr/gserve)
+[![Contributions Welcome](https://img.shields.io/badge/Contributions-Welcome-brightgreen.svg)](https://github.com/ajthr/gserve)
+
 ## Gserve
 
 Gserve is a cli tool to create a simple, zero-configuration HTTP file server.

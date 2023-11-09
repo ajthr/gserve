@@ -3,7 +3,7 @@
 package="github.com/ajthr/gserve"
 package_split=(${package//\// })
 package_name=${package_split[-1]}
-package_version="v0.1"
+package_version="v0.2"
 
 platforms=("linux/amd64" "windows/amd64" "darwin/amd64")
 
