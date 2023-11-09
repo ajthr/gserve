@@ -9,6 +9,7 @@ import (
 	"log"
 	"time"
 	"bytes"
+	"embed"
 	"strings"
 	"net/http"
 	"io/ioutil"
@@ -21,6 +22,9 @@ import (
 
 var rootDir string
 
+//go:embed templates/*
+var f embed.FS
+
 func indexHTMLTemplateHandler(response http.ResponseWriter, request *http.Request) {
 	relativePath := strings.TrimPrefix(request.URL.Path, "/")
 	log.Println(filepath.Clean(relativePath + "/"))
@@ -30,7 +34,10 @@ func indexHTMLTemplateHandler(response http.ResponseWriter, request *http.Reques
 	fileInfo, err := os.Stat(path)
 	if err != nil {
 		response.WriteHeader(http.StatusNotFound)
-		tmpl := template.Must(template.ParseFiles("templates/404.html"))
+		if err != nil {
+			log.Println(err)
+		}
+		tmpl := template.Must(template.ParseFS(f, "templates/404.html"))
 		tmpl.Execute(response, nil)
 	} else {
 
@@ -41,11 +48,11 @@ func indexHTMLTemplateHandler(response http.ResponseWriter, request *http.Reques
 			if err != nil {
 				log.Println(err)
 				response.WriteHeader(http.StatusInternalServerError)
-				tmpl := template.Must(template.ParseFiles("templates/500.html"))
+				tmpl := template.Must(template.ParseFS(f, "templates/500.html"))
 				tmpl.Execute(response, nil)
 			}
 			
-			tmpl := template.Must(template.ParseFiles("templates/index.html"))
+			tmpl := template.Must(template.ParseFS(f, "templates/index.html"))
 			tmpl.Execute(response, content)
 		
 		} else {
@@ -54,7 +61,7 @@ func indexHTMLTemplateHandler(response http.ResponseWriter, request *http.Reques
 			if(err != nil){
 				log.Println(err)
 				response.WriteHeader(http.StatusInternalServerError)
-				tmpl := template.Must(template.ParseFiles("templates/500.html"))
+				tmpl := template.Must(template.ParseFS(f, "templates/500.html"))
 				tmpl.Execute(response, nil)
 			}
 
@@ -62,7 +69,7 @@ func indexHTMLTemplateHandler(response http.ResponseWriter, request *http.Reques
 			if err != nil {
 
 				response.WriteHeader(http.StatusInternalServerError)
-				tmpl := template.Must(template.ParseFiles("templates/500.html"))
+				tmpl := template.Must(template.ParseFS(f, "templates/500.html"))
 				tmpl.Execute(response, nil)
 
 			}
